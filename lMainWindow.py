@@ -29,7 +29,8 @@ class ldispMain(QtWidgets.QMainWindow):
             self.createFolderView(os.path.dirname(os.path.abspath(fname)))
             self.disp_lfile(fname)
         else:
-            self.createFolderView()
+            print(os.curdir)
+            self.createFolderView(os.path.abspath(os.path.curdir))
         
         ## Toolbar
         # The toolbar has to be created after the folder view since it depends
@@ -83,7 +84,7 @@ class ldispMain(QtWidgets.QMainWindow):
         toolbar.addAction(preImAction)
         toolbar.addAction(nextImAction)
 
-    def createFolderView(self, path = '/home/adsche/python3/import_dat/testfiles'):
+    def createFolderView(self, path):
 
         self.lTreeView = lftv.lTreeView()
         # Set Model
