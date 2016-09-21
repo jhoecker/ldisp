@@ -38,6 +38,7 @@ class lTreeView(QtWidgets.QTreeView):
         
     def selectPrevious(self):
         currentIndex = self._selectedIndex()
+        if currentIndex is None: return
         if currentIndex.row() > 0:
             newIndex = self.indexAbove(currentIndex)
         else:
@@ -51,6 +52,7 @@ class lTreeView(QtWidgets.QTreeView):
         
     def selectNext(self):
         currentIndex = self._selectedIndex()
+        if currentIndex is None: return
         if currentIndex.row() < self.model().rowCount(currentIndex.parent())-1:
             newIndex = self.indexBelow(currentIndex)
         else:     
