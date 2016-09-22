@@ -8,6 +8,7 @@ import pyqtgraph as pg
 import LEEMImg as li
 import lMetaDataModell as lmdm
 import lFileTreeView as lftv
+import lconfig
  
 class ldispMain(QtWidgets.QMainWindow):
 
@@ -29,7 +30,6 @@ class ldispMain(QtWidgets.QMainWindow):
             self.createFolderView(os.path.dirname(os.path.abspath(fname)))
             self.disp_lfile(fname)
         else:
-            print(os.curdir)
             self.createFolderView(os.path.abspath(os.path.curdir))
         
         ## Toolbar
@@ -54,26 +54,25 @@ class ldispMain(QtWidgets.QMainWindow):
     def createToolbar(self):
         ## exit
         exitAction = QtGui.QAction(QtGui.QIcon.fromTheme('application-exit'), 
-                                   'Exit', 
-                                   self)
+                                   'Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.triggered.connect(QtWidgets.qApp.quit)
         ## open file
         openAction = QtGui.QAction(QtGui.QIcon.fromTheme('document-open'), 
-                                   'Open',
-                                   self)
+                                   'Open', self)
         openAction.setShortcut('Ctrl+O')
         openAction.triggered.connect(self.open_folder)
         ## next file
         nextImAction = QtGui.QAction(QtGui.QIcon.fromTheme('go-next'), 
-                                     'Next image', 
-                                     self)
+                                     'Next image', self)
         nextImAction.triggered.connect(self.lTreeView.selectNext)
         ## previous file
         preImAction = QtGui.QAction(QtGui.QIcon.fromTheme('go-previous'),
-                                    'Previous image', 
-                                    self)
+                                    'Previous image', self)
         preImAction.triggered.connect(self.lTreeView.selectPrevious)
+        configAction = QtGui.QAction(QtGui.QIcon.fromTheme('configure'),
+                                     'Configure View', self)
+        configAction.triggered.connect(self.configure_View)
 
         toolbar = self.addToolBar('Tools')
         toolbar.setMovable(False)
@@ -83,6 +82,7 @@ class ldispMain(QtWidgets.QMainWindow):
         toolbar.addAction(exitAction)
         toolbar.addAction(preImAction)
         toolbar.addAction(nextImAction)
+        toolbar.addAction(configAction)
 
     def createFolderView(self, path):
 
@@ -113,6 +113,10 @@ class ldispMain(QtWidgets.QMainWindow):
         self.fmodel.setRootPath(dname)
         self.lTreeView.setRootIndex(self.fmodel.index(dname))
         self.lTreeView.sortByColumn(0,0)
+        
+    def configure_View(self):
+        self.configDialog = lconfig.ConfDialog()
+        self.configDialog.show()
  
     def disp_lfile(self, *args, **karwgs):
         """Displays LEEM images in pyqtgraph widget"""
