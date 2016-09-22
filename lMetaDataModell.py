@@ -10,17 +10,20 @@ class lMetaDataModel(QtCore.QAbstractListModel):
         self.__metadata = metadata
         # Define which data to display
         # TODO Should be configuralbe
-        self.__dispedKeys = ('FOV', 'Start Voltage', 'Sample Temp.',
-                             'Main', 'timestamp')  
+        _dispedKeys = ('FOV', 'Start Voltage', 'Sample Temp.',
+                             'Main', 'timestamp', 'test')
+        self._dispData = dict()
+        self.getDispedValues(_dispedKeys)
 
     def rowCount(self, parent):
-        return len(self.__dispedKeys)+1
+        return len(self._dispData)+1
 
     def data(self, index, role):
+        data_keys = list(self._dispData.keys())
         if role == QtCore.Qt.DisplayRole:
-            if index.row() < len(self.__dispedKeys):
+            if index.row() < len(self._dispData):
                 row = index.row()
-                key = self.__dispedKeys[row]
+                key = data_keys[row]
                 value = self.__metadata[key]
                 key, value = self.format_metadata(key, value)
                 ## TODO Fix intendention
@@ -37,4 +40,12 @@ class lMetaDataModel(QtCore.QAbstractListModel):
         elif type(value) is list:
             value = '{0:.1f} {1}'.format(value[0], value[1])
         return key, value
+    
+    def getDispedValues(self, _dispKeys):
+        """Check that the metadata which should be displayed in the metaDataView
+        is available"""
+        for item in _dispKeys:
+            if item in self.__metadata.keys():
+                self._dispData[item] = self.__metadata[item]
+        
  
