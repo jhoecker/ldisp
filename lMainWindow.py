@@ -73,6 +73,10 @@ class ldispMain(QtWidgets.QMainWindow):
         configAction = QtGui.QAction(QtGui.QIcon.fromTheme('configure'),
                                      'Configure View', self)
         configAction.triggered.connect(self.configure_View)
+        
+        spacer = QtWidgets.QWidget()
+        spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, 
+                             QtGui.QSizePolicy.Expanding)
 
         toolbar = self.addToolBar('Tools')
         toolbar.setMovable(False)
@@ -82,6 +86,7 @@ class ldispMain(QtWidgets.QMainWindow):
         toolbar.addAction(exitAction)
         toolbar.addAction(preImAction)
         toolbar.addAction(nextImAction)
+        toolbar.addWidget(spacer)
         toolbar.addAction(configAction)
 
     def createFolderView(self, path):
