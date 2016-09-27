@@ -17,6 +17,8 @@ class ldispMain(QtWidgets.QMainWindow):
 
     def initUI(self, fname):
 
+        self.setIconTheme()
+
         ## Widgets ##
         self.setCentralWidget(QtGui.QWidget(self))
         self.metaDataListView = QtWidgets.QListView()
@@ -128,3 +130,11 @@ class ldispMain(QtWidgets.QMainWindow):
         ##         qobjectstarttimer-qtimer-can-only-be
         self.metaDataListView.setModel(lmdm.lMetaDataModel(leem_img.metadata,
                                                            self.metaDataListView))
+
+    def setIconTheme(self):
+        de = os.environ.get('DESKTOP_SESSION').lower()
+        if de.__contains__('plasma5'):
+            pass
+        elif de.__contains__('lxde'):
+            QtGui.QIcon.setThemeName('nuoveXT2')
+
