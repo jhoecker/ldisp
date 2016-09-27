@@ -14,22 +14,15 @@ class ConfDialog(QtGui.QDialog):
         self.btn_ok = QtGui.QPushButton('Ok', self)
         self.btn_cnl = QtGui.QPushButton('Cancel', self)
         
+        ii = 0
         for item in metaDataKeys:
             ## Use list with strings to create checkboxes
-            pass
-        
-        tt = QtWidgets.QCheckBox('Test')
-        
-        
-        
-        layout.setColumnStretch(1, 2)
-        layout.setRowStretch(1,2)
-        
-        layout.addWidget(tt, 1,2)
-        
-        layout.addWidget(self.btn_ok, 3, 3, 1, 1)
-        
-        layout.addWidget(self.btn_cnl, 3, 4, 1, 1)
+            layout.addWidget(QtWidgets.QCheckBox(item), ii-ii%2,ii%2)
+            ii += 1
+        #layout.setColumnStretch(ii, 1)
+        #layout.setRowStretch(ii,2)
+        layout.addWidget(self.btn_ok, ii, 1, 1, 1)
+        layout.addWidget(self.btn_cnl, ii, 2, 1, 1)
         self.setLayout(layout)
         
         self.setGeometry(300, 300, 290, 150)
