@@ -28,8 +28,11 @@ class ldispMain(QtWidgets.QMainWindow):
 
         ## TreeView of Folder
         if fname:
-            self.createFolderView(os.path.dirname(os.path.abspath(fname)))
-            self.disp_lfile(fname)
+            if os.path.isfile(fname):
+                self.createFolderView(os.path.dirname(os.path.abspath(fname)))
+                self.disp_lfile(fname)
+            else:
+                self.createFolderView(os.path.abspath(fname))
         else:
             self.createFolderView(os.path.abspath(os.path.curdir))
         
