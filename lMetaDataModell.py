@@ -26,10 +26,9 @@ class lMetaDataModel(QtCore.QAbstractListModel):
                 key = data_keys[row]
                 value = self.__metadata[key]
                 key, value = self.format_metadata(key, value)
-                ## TODO Fix intendention
-                return '{:<13}\t {}'.format(key, value)
+                return '{0}: {1}'.format(key, value)
             else:
-                return '{0:<13}  {1} x {2} px'.format('Dimension',
+                return '{0}:  {1} x {2} px'.format('Dimension',
                 self.__metadata['width'], self.__metadata['height'])
 
     def format_metadata(self, key, value):
