@@ -52,7 +52,7 @@ class ldispMain(QtWidgets.QMainWindow):
 
         QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
 
-        self.setGeometry(100, 100, 1000, 500)
+        self.setGeometry(0, 0, 900, 500)
         self.setWindowTitle('ldisp - LEEM image viewer')
 
     def createToolbar(self):
