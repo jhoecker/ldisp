@@ -27,14 +27,7 @@ class ldispMain(QtWidgets.QMainWindow):
         self.createImView()
 
         ## TreeView of Folder
-        if fname:
-            if os.path.isfile(fname):
-                self.createFolderView(os.path.dirname(os.path.abspath(fname)))
-                self.disp_lfile(fname)
-            else:
-                self.createFolderView(os.path.abspath(fname))
-        else:
-            self.createFolderView(os.path.abspath(os.path.curdir))
+        self.createFolderView(fname)
         
         ## Toolbar
         # The toolbar has to be created after the folder view since it depends
@@ -89,9 +82,16 @@ class ldispMain(QtWidgets.QMainWindow):
         toolbar.addAction(nextImAction)
         toolbar.addWidget(spacer)
 
-    def createFolderView(self, path):
-
+    def createFolderView(self, fname):
+        """Sets up the folder view and the corresponding filesystem model"""
         self.lTreeView = lftv.lTreeView()
+        # Check if given path is file or folder
+        if os.path.isfile(fname):
+            fname = os.path.abspath(fname)
+            path = os.path.dirname(fname)
+            self.disp_lfile(fname)
+        else:
+            path = os.path.abspath(fname)
         # Set Model
         self.fmodel = QtWidgets.QFileSystemModel(self.lTreeView)
         self.fmodel.setRootPath(path)
