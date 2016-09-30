@@ -86,12 +86,18 @@ class ldispMain(QtWidgets.QMainWindow):
         """Sets up the folder view and the corresponding filesystem model"""
         self.lTreeView = lftv.lTreeView()
         # Check if given path is file or folder
-        if os.path.isfile(fname):
+        if fname is None:
+            path = os.path.curdir
+        elif os.path.isfile(fname):
             fname = os.path.abspath(fname)
             path = os.path.dirname(fname)
             self.disp_lfile(fname)
-        else:
+        elif os.path.isdir(fname):
             path = os.path.abspath(fname)
+        else:
+            logging.error('No directory of file given')
+            path = os.path.curdir
+
         # Set Model
         self.fmodel = QtWidgets.QFileSystemModel(self.lTreeView)
         self.fmodel.setRootPath(path)
