@@ -24,7 +24,9 @@ class ldispMain(QtWidgets.QMainWindow):
 
         ## Widgets ##
         self.setCentralWidget(QtGui.QWidget(self))
-        self.metaDataListView = QtWidgets.QListView()
+
+        ## metaDataView
+        self.createMetaDataView()
 
         ## LEEM Image View
         self.createImView()
@@ -39,7 +41,7 @@ class ldispMain(QtWidgets.QMainWindow):
 
         ## Layout
         layout = QtGui.QGridLayout()
-        layout.addWidget(self.metaDataListView, 0, 0, 1, 1)
+        layout.addWidget(self.metaDataGroup, 0, 0, 1, 1)
         layout.addWidget(self.lTreeView, 1, 0, 1, 1)
         layout.addWidget(self.lImView, 0, 1, 2, 1)
         layout.setColumnStretch(0, 1)
@@ -50,6 +52,16 @@ class ldispMain(QtWidgets.QMainWindow):
 
         self.setGeometry(0, 0, 900, 500)
         self.setWindowTitle('ldisp - LEEM image viewer')
+
+    def createMetaDataView(self):
+        self.metaDataGroup = QtGui.QGroupBox('Meta Data')
+        ## FIXME Alignment does not affect title
+        # Bug in Qt?
+        self.metaDataGroup.setAlignment(QtCore.Qt.AlignLeft)
+        self.metaDataBox = QtGui.QVBoxLayout()
+        self.metaDataListView = QtWidgets.QListView()
+        self.metaDataBox.addWidget(self.metaDataListView)
+        self.metaDataGroup.setLayout(self.metaDataBox)
 
     def createToolbar(self):
         ## exit
