@@ -14,8 +14,9 @@ class ldispMain(QtWidgets.QMainWindow):
 
     def __init__(self, fname):
         super(ldispMain, self).__init__()
-        self.metadata = lmdm.MetaData()
         self.initUI(fname)
+        # create instance of metadata to set the default keys
+        self.metadata = lmdm.MetaData()
 
     def initUI(self, fname):
 
@@ -69,15 +70,16 @@ class ldispMain(QtWidgets.QMainWindow):
         preImAction = QtGui.QAction(QtGui.QIcon.fromTheme('go-previous'),
                                     'Previous image', self)
         preImAction.triggered.connect(self.lTreeView.selectPrevious)
+        ## configuration dialog
         configAction = QtGui.QAction(QtGui.QIcon.fromTheme('configure'),
                                     'Configure View', self)
         configAction.triggered.connect(self.configure_View)
-
-        
+        ## shift config dialog to the right
         spacer = QtWidgets.QWidget()
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, 
                              QtGui.QSizePolicy.Expanding)
 
+        ## Setup Toolbar
         toolbar = self.addToolBar('Tools')
         toolbar.setMovable(False)
         toolbar.setFloatable(False)
@@ -146,7 +148,7 @@ class ldispMain(QtWidgets.QMainWindow):
             fname = args[0]
         else:
             fname = self.lTreeView.get_fname()
-        leem_img = li.LEEMImg(fname)
+        leem_img = li.UKSoftImg(fname)
         self.lImView.setImage(leem_img.data)
         self.metadata = lmdm.MetaData(leem_img.metadata)
         ## To avoid QTimer-Errors add parents (the views) to the models

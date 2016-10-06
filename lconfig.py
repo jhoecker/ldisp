@@ -5,19 +5,21 @@ class ConfDialog(QtGui.QMessageBox):
         QtGui.QDialog.__init__(self, parent)
         
         _availMetaDataKeys = ('FOV', 'Start Voltage', 'Sample Temp.',
-                             'Main', 'timestamp', 'test', 'Dimension')
+                             'Main', 'timestamp', 'Dimension', 'id', 'size',
+                             'version', 'Camera Exposure', 'Average Images', 
+                             'Mitutoyo X', 'Mitutoyo Y')
         self._metaDataBoxes = dict()
 
         # Instantiate UI elements
-        innerLayoutCheckboxes = QtGui.QGridLayout()
+        layoutCheckboxes = QtGui.QGridLayout()
         ii = 0
         for item in _availMetaDataKeys:
             ## Use list with strings to create checkboxes
             self._metaDataBoxes[item] = QtWidgets.QCheckBox(item)
-            innerLayoutCheckboxes.addWidget(self._metaDataBoxes[item], ii-ii%2,ii%2)
+            layoutCheckboxes.addWidget(self._metaDataBoxes[item], ii-ii%3,ii%3)
             ii += 1
 
-        self.layout().addLayout(innerLayoutCheckboxes, 0, 0)
+        self.layout().addLayout(layoutCheckboxes, 0, 0)
         self.setStandardButtons(self.Ok | self.Cancel)
         self.setWindowTitle('Configuration')
         self.setMetaDataKeys(currentKeys)
@@ -32,8 +34,3 @@ class ConfDialog(QtGui.QMessageBox):
     def setMetaDataKeys(self, dispedKeys):
         for key in dispedKeys:
             self._metaDataBoxes[key].setChecked(True)
-
-
-
-
-
