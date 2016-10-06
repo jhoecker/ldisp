@@ -5,7 +5,7 @@ class ConfDialog(QtGui.QMessageBox):
         QtGui.QDialog.__init__(self, parent)
         
         _availMetaDataKeys = ('FOV', 'Start Voltage', 'Sample Temp.',
-                             'Main', 'timestamp', 'Dimension', 'id', 'size',
+                             'Main', 'timestamp', 'Dimension', 'id',
                              'version', 'Camera Exposure', 'Average Images', 
                              'Mitutoyo X', 'Mitutoyo Y')
         self._metaDataBoxes = dict()
