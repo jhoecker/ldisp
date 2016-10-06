@@ -11,6 +11,7 @@ class lMetaDataModel(QtCore.QAbstractListModel):
         return len(self._metadata)+1
 
     def data(self, index, role):
+<<<<<<< HEAD
         data_keys = list(self._metadata.keys())
         if role == QtCore.Qt.DisplayRole:
             if index.row() < len(self._metadata):
@@ -24,6 +25,7 @@ class lMetaDataModel(QtCore.QAbstractListModel):
     def format_metadata(self, key, value):
         if key == 'timestamp':
             key = 'Measured'
+            value = value.strftime("%Y-%m-%d %H:%M:%S")
         if key == 'Main' or key == 'Column':
             value = '{0:.1e} {1}'.format(value[0], value[1])
         elif type(value) is list:

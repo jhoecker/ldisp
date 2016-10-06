@@ -8,7 +8,6 @@ import pyqtgraph as pg
 import LEEMImg as li
 import lMetaDataModell as lmdm
 import lFileTreeView as lftv
-import lconfig
  
 class ldispMain(QtWidgets.QMainWindow):
 
@@ -19,6 +18,8 @@ class ldispMain(QtWidgets.QMainWindow):
 
     def initUI(self, fname):
 
+        self.setIconTheme()
+
         ## Widgets ##
         self.setCentralWidget(QtGui.QWidget(self))
         self.metaDataListView = QtWidgets.QListView()
@@ -27,11 +28,7 @@ class ldispMain(QtWidgets.QMainWindow):
         self.createImView()
 
         ## TreeView of Folder
-        if fname:
-            self.createFolderView(os.path.dirname(os.path.abspath(fname)))
-            self.disp_lfile(fname)
-        else:
-            self.createFolderView(os.path.abspath(os.path.curdir))
+        self.createFolderView(fname)
         
         ## Toolbar
         # The toolbar has to be created after the folder view since it depends
@@ -49,7 +46,7 @@ class ldispMain(QtWidgets.QMainWindow):
 
         QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
 
-        self.setGeometry(100, 100, 1000, 500)
+        self.setGeometry(0, 0, 900, 500)
         self.setWindowTitle('ldisp - LEEM image viewer')
 
     def createToolbar(self):
@@ -71,9 +68,6 @@ class ldispMain(QtWidgets.QMainWindow):
         preImAction = QtGui.QAction(QtGui.QIcon.fromTheme('go-previous'),
                                     'Previous image', self)
         preImAction.triggered.connect(self.lTreeView.selectPrevious)
-        configAction = QtGui.QAction(QtGui.QIcon.fromTheme('configure'),
-                                     'Configure View', self)
-        configAction.triggered.connect(self.configure_View)
         
         spacer = QtWidgets.QWidget()
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, 
@@ -90,8 +84,22 @@ class ldispMain(QtWidgets.QMainWindow):
         toolbar.addWidget(spacer)
         toolbar.addAction(configAction)
 
-    def createFolderView(self, path):
+    def createFolderView(self, fname):
+        """Sets up the folder view and the corresponding filesystem model"""
         self.lTreeView = lftv.lTreeView()
+        # Check if given path is file or folder
+        if fname is None:
+            path = os.path.curdir
+        elif os.path.isfile(fname):
+            fname = os.path.abspath(fname)
+            path = os.path.dirname(fname)
+            self.disp_lfile(fname)
+        elif os.path.isdir(fname):
+            path = os.path.abspath(fname)
+        else:
+            logging.error('No directory of file given')
+            path = os.path.curdir
+
         # Set Model
         self.fmodel = QtWidgets.QFileSystemModel(self.lTreeView)
         self.fmodel.setRootPath(path)
@@ -142,3 +150,11 @@ class ldispMain(QtWidgets.QMainWindow):
         ##         qobjectstarttimer-qtimer-can-only-be
         self.metaDataListView.setModel(lmdm.lMetaDataModel(self.metadata.getDispedData(),
                                                            self.metaDataListView))
+
+    def setIconTheme(self):
+        de = os.environ.get('DESKTOP_SESSION').lower()
+        if de.__contains__('plasma5'):
+            pass
+        elif de.__contains__('lxde'):
+            QtGui.QIcon.setThemeName('nuoveXT2')
+
