@@ -14,6 +14,7 @@ class ldispMain(QtWidgets.QMainWindow):
 
     def __init__(self, fname):
         super(ldispMain, self).__init__()
+        self.metadata = lmdm.MetaData()
         self.initUI(fname)
 
     def initUI(self, fname):
@@ -59,7 +60,7 @@ class ldispMain(QtWidgets.QMainWindow):
         exitAction.triggered.connect(QtWidgets.qApp.quit)
         ## open file
         openAction = QtGui.QAction(QtGui.QIcon.fromTheme('document-open'), 
-                                   'Open', self)
+                                   'Open Folder', self)
         openAction.setShortcut('Ctrl+O')
         openAction.triggered.connect(self.open_folder)
         ## next file
@@ -90,7 +91,6 @@ class ldispMain(QtWidgets.QMainWindow):
         toolbar.addAction(configAction)
 
     def createFolderView(self, path):
-
         self.lTreeView = lftv.lTreeView()
         # Set Model
         self.fmodel = QtWidgets.QFileSystemModel(self.lTreeView)
@@ -120,8 +120,12 @@ class ldispMain(QtWidgets.QMainWindow):
         self.lTreeView.sortByColumn(0,0)
         
     def configure_View(self):
-        self.configDialog = lconfig.ConfDialog()
-        self.configDialog.show()
+        self.configDialog = lconfig.ConfDialog(self.metadata.currentKeys)
+        # FIXME Use QDialog.Accept or something similar.
+        # Using .exec_ == 1024 is just a workaround
+        if self.configDialog.exec_() == 1024:
+            newKeys = self.configDialog.getMetaDataKeys()
+            self.metadata.setCurrentKeys(newKeys)
  
     def disp_lfile(self, *args, **karwgs):
         """Displays LEEM images in pyqtgraph widget"""
@@ -131,9 +135,10 @@ class ldispMain(QtWidgets.QMainWindow):
             fname = self.lTreeView.get_fname()
         leem_img = li.LEEMImg(fname)
         self.lImView.setImage(leem_img.data)
+        self.metadata = lmdm.MetaData(leem_img.metadata)
         ## To avoid QTimer-Errors add parents (the views) to the models
         ## see http://stackoverflow.com/questions/30549477/
         ##         pyqt-qcombobox-with-qstringmodel-cause-
         ##         qobjectstarttimer-qtimer-can-only-be
-        self.metaDataListView.setModel(lmdm.lMetaDataModel(leem_img.metadata,
+        self.metaDataListView.setModel(lmdm.lMetaDataModel(self.metadata.getDispedData(),
                                                            self.metaDataListView))

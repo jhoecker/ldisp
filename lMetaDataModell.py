@@ -1,36 +1,25 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 from PyQt5 import QtCore, QtWidgets
 
 class lMetaDataModel(QtCore.QAbstractListModel):
     """Class constructing the view model for the meta data"""
-    def __init__(self, metadata={}, parent=None):
+    def __init__(self, dispedData, parent=None):
         QtCore.QAbstractListModel.__init__(self, parent)
-        self.__metadata = metadata
-        # Define which data to display
-        # TODO Should be configuralbe
-        _dispedKeys = ('FOV', 'Start Voltage', 'Sample Temp.',
-                             'Main', 'timestamp', 'test')
-        self._dispData = dict()
-        self.getDispedValues(_dispedKeys)
+        self._metadata = dispedData
 
     def rowCount(self, parent):
-        return len(self._dispData)+1
+        return len(self._metadata)+1
 
     def data(self, index, role):
-        data_keys = list(self._dispData.keys())
+        data_keys = list(self._metadata.keys())
         if role == QtCore.Qt.DisplayRole:
-            if index.row() < len(self._dispData):
+            if index.row() < len(self._metadata):
                 row = index.row()
                 key = data_keys[row]
-                value = self.__metadata[key]
+                value = self._metadata[key]
                 key, value = self.format_metadata(key, value)
                 ## TODO Fix intendention
-                return '{:<13}\t {}'.format(key, value)
-            else:
-                return '{0:<13}  {1} x {2} px'.format('Dimension',
-                self.__metadata['width'], self.__metadata['height'])
+                return '{:<13} {}'.format(key, value)
 
     def format_metadata(self, key, value):
         if key == 'timestamp':
@@ -41,11 +30,28 @@ class lMetaDataModel(QtCore.QAbstractListModel):
             value = '{0:.1f} {1}'.format(value[0], value[1])
         return key, value
     
-    def getDispedValues(self, _dispKeys):
-        """Check that the metadata which should be displayed in the metaDataView
-        is available"""
-        for item in _dispKeys:
-            if item in self.__metadata.keys():
-                self._dispData[item] = self.__metadata[item]
-        
- 
+
+class MetaData(object):
+    """Manages the metadata and its keys that are stored in every LEEM image.
+    Own class since the Keys should not change every time a new model is 
+    loaded."""
+    ## Use class variable for currentKeys and change only on demand
+    ## Then the Keys are not set to default if a new object is generated
+    currentKeys = ('FOV', 'Start Voltage', 'Sample Temp.',
+                   'Main', 'Dimension')
+    def __init__(self, metadata={}, dispKeys=None):
+        self._metadata = metadata
+
+    @staticmethod
+    def setCurrentKeys(newKeys):
+        MetaData.currentKeys = newKeys
+
+    def getDispedData(self):
+        _dispData = dict()
+        for item in MetaData.currentKeys:
+            if item in self._metadata.keys():
+                _dispData[item] = self._metadata[item]
+            elif item == 'Dimension':
+                _dispData[item] ='{0} x {1} px'.format(self._metadata['width'],
+                                                       self._metadata['height'])
+        return _dispData
