@@ -11,7 +11,6 @@ class lMetaDataModel(QtCore.QAbstractListModel):
         return len(self._metadata)+1
 
     def data(self, index, role):
-<<<<<<< HEAD
         data_keys = list(self._metadata.keys())
         if role == QtCore.Qt.DisplayRole:
             if index.row() < len(self._metadata):

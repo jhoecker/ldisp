@@ -8,6 +8,7 @@ import pyqtgraph as pg
 import LEEMImg as li
 import lMetaDataModell as lmdm
 import lFileTreeView as lftv
+import lconfig
  
 class ldispMain(QtWidgets.QMainWindow):
 
@@ -68,6 +69,10 @@ class ldispMain(QtWidgets.QMainWindow):
         preImAction = QtGui.QAction(QtGui.QIcon.fromTheme('go-previous'),
                                     'Previous image', self)
         preImAction.triggered.connect(self.lTreeView.selectPrevious)
+        configAction = QtGui.QAction(QtGui.QIcon.fromTheme('configure'),
+                                    'Configure View', self)
+        configAction.triggered.connect(self.configure_View)
+
         
         spacer = QtWidgets.QWidget()
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, 
