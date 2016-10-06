@@ -6,7 +6,7 @@ import logging
 import os
 import pyqtgraph as pg
 import LEEMImg as li
-import lMetaDataModell as lmdm
+import lMetaDataModel as lmdm
 import lFileTreeView as lftv
 import lconfig
  
