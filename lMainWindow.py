@@ -90,7 +90,6 @@ class ldispMain(QtWidgets.QMainWindow):
         spacer = QtWidgets.QWidget()
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, 
                              QtGui.QSizePolicy.Expanding)
-
         ## Setup Toolbar
         toolbar = self.addToolBar('Tools')
         toolbar.setMovable(False)
@@ -153,6 +152,10 @@ class ldispMain(QtWidgets.QMainWindow):
         if self.configDialog.exec_() == 1024:
             newKeys = self.configDialog.getMetaDataKeys()
             self.metadata.setCurrentKeys(newKeys)
+        # Load new data model if one is set after the keys were changed
+        if self.metaDataListView.model() is not None:
+            self.metaDataListView.setModel(lmdm.lMetaDataModel(self.metadata.getDispedData(),
+                                                               self.metaDataListView))
  
     def disp_lfile(self, *args, **karwgs):
         """Displays LEEM images in pyqtgraph widget"""
@@ -176,4 +179,3 @@ class ldispMain(QtWidgets.QMainWindow):
             pass
         elif de.__contains__('lxde'):
             QtGui.QIcon.setThemeName('nuoveXT2')
-
