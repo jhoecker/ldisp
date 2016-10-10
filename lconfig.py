@@ -11,6 +11,8 @@ class ConfDialog(QtGui.QMessageBox):
         self._metaDataBoxes = dict()
 
         # Instantiate UI elements
+        self.boxGroup = QtGui.QGroupBox('Display meta data')
+        self.boxGroup.setAlignment(QtCore.Qt.AlignLeft)
         layoutCheckboxes = QtGui.QGridLayout()
         ii = 0
         for item in _availMetaDataKeys:
@@ -18,8 +20,9 @@ class ConfDialog(QtGui.QMessageBox):
             self._metaDataBoxes[item] = QtWidgets.QCheckBox(item)
             layoutCheckboxes.addWidget(self._metaDataBoxes[item], ii-ii%3,ii%3)
             ii += 1
+        self.boxGroup.setLayout(layoutCheckboxes)
+        self.layout().addWidget(self.boxGroup, 0, 0)
 
-        self.layout().addLayout(layoutCheckboxes, 0, 0)
         self.setStandardButtons(self.Ok | self.Cancel)
         self.setWindowTitle('Configuration')
         self.setMetaDataKeys(currentKeys)
