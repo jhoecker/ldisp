@@ -27,7 +27,7 @@ class lTreeView(QtWidgets.QTreeView):
         try: 
             currentIndex = self.selectionModel().selectedIndexes()[0]
         except IndexError:
-            logging.debug('No item selected.')
+            logging.debug('lTreeView:_selectedIndex: No item selected.')
             return
         return currentIndex
     

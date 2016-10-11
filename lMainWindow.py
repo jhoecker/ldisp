@@ -13,18 +13,26 @@ import lconfig
 class ldispMain(QtWidgets.QMainWindow):
     """ldisp Main Window"""
     leemImgChanged = QtCore.pyqtSignal()
+
     def __init__(self, fname):
         super(ldispMain, self).__init__()
-        self.initUI(fname)
         # create instance of metadata to set the default keys
         self.metadata = lmdm.MetaData()
+        # variables
         self.b_normCCD = False
         self.CCDimg = None
         self.leemImg = None
-
+        filename = self.getPath(fname)
         self.leemImgChanged.connect(self.disp_lfile)
 
-    def initUI(self, fname):
+        self.initUI()
+
+        # image file if given from cmd
+        ## FIXME CCD subtraction is not working on images loaded from cmd
+        # will be fixed if item is selected (see TODO in createFolderView)
+        if filename: self.getLEEMImg(filename)
+
+    def initUI(self):
 
         self.setIconTheme()
 
@@ -38,7 +46,7 @@ class ldispMain(QtWidgets.QMainWindow):
         self.createImView()
 
         ## TreeView of Folder
-        self.createFolderView(fname)
+        self.createFolderView()
         
         ## Toolbar
         # The toolbar has to be created after the folder view since it depends
@@ -117,30 +125,19 @@ class ldispMain(QtWidgets.QMainWindow):
         self.getCCDMenu(normAction)
         self.normButton = toolbar.widgetForAction(normAction)
         self.normButton.setPopupMode(QtGui.QToolButton.DelayedPopup)
-        normAction.triggered.connect(self.normCCD)
+        normAction.triggered.connect(self.toggleCCDButton)
         ## align config dialog on right hand side
         toolbar.addWidget(spacer)
         toolbar.addAction(configAction)
 
-    def createFolderView(self, fname):
+    def createFolderView(self):
         """Sets up the folder view and the corresponding filesystem model"""
+        ## TODO Pass filename if set to view and select
         self.lTreeView = lftv.lTreeView()
-        # Check if given path is file or folder
-        if fname is None:
-            path = os.path.curdir
-        elif os.path.isfile(fname):
-            fname = os.path.abspath(fname)
-            path = os.path.dirname(fname)
-            self.leemImg = self.getLEEMImg(fname)
-        elif os.path.isdir(fname):
-            path = os.path.abspath(fname)
-        else:
-            logging.error('No directory of file given')
-            path = os.path.curdir
 
         # Set Model
         self.fmodel = QtWidgets.QFileSystemModel(self.lTreeView)
-        self.fmodel.setRootPath(path)
+        self.fmodel.setRootPath(self.currentPath)
         # Filter out all files without extension .dat
         self.fmodel.setFilter(QtCore.QDir.Filter(
                 QtCore.QDir.Dirs | QtCore.QDir.Files |
@@ -152,7 +149,7 @@ class ldispMain(QtWidgets.QMainWindow):
 
         ## Setup View
         self.lTreeView.setModel(self.fmodel)
-        self.lTreeView.setRootIndex(self.fmodel.index(path))
+        self.lTreeView.setRootIndex(self.fmodel.index(self.currentPath))
         self.lTreeView.setupView()
         self.lTreeView.newItemSelected.connect(self.getLEEMImg)
 
@@ -160,7 +157,9 @@ class ldispMain(QtWidgets.QMainWindow):
         self.lImView = pg.ImageView()
 
     def open_folder(self):
-        dname = QtGui.QFileDialog.getExistingDirectory(self, 'Select Directory')
+        dname = QtGui.QFileDialog.getExistingDirectory(self,
+                'Select Directory',
+                self.currentPath)
         self.fmodel.setRootPath(dname)
         self.lTreeView.setRootIndex(self.fmodel.index(dname))
         self.lTreeView.sortByColumn(0,0)
@@ -186,8 +185,8 @@ class ldispMain(QtWidgets.QMainWindow):
         else:
             fname = self.lTreeView.get_fname()
         self.leemImg = li.UKSoftImg(fname)
+        logging.debug('getLEEMImg: b_normCCD is {}'.format(self.b_normCCD))
         if self.b_normCCD is True:
-            logging.debug('getLEEMImg: b_normCCD is {}'.format(self.b_normCCD))
             try:
                 self.leemImg.normalizeOnCCD(self.CCDimg)
             except li.DimensionError:
@@ -212,6 +211,20 @@ class ldispMain(QtWidgets.QMainWindow):
                         self.metadata.getDispedData(),
                         self.metaDataListView))
 
+    def getPath(self, fname=None):
+        if fname is None:
+            self.currentPath = os.path.curdir
+        elif os.path.isfile(fname):
+            fname = os.path.abspath(fname)
+            self.currentPath = os.path.dirname(fname)
+        elif os.path.isdir(fname):
+            self.currentPath = os.path.abspath(fname)
+        else:
+            logging.error('No directory of file given')
+            self.currentPath = os.path.curdir
+        return fname
+
+
     def toggleNormState(self):
         if self.b_normCCD is False:
             self.b_normCCD = True
@@ -227,22 +240,18 @@ class ldispMain(QtWidgets.QMainWindow):
         self.b_normCCD = state
         self.normButton.setChecked(state)
 
-    def normCCD(self):
+    def toggleCCDButton(self):
         if self.b_normCCD is False and self.CCDimg == None:
             self.loadCCD()
-            return
         self.toggleNormState()
 
     def loadCCD(self):
-        # TODO replace currentDir by cw-parameter
-        currentDir = '/home/adsche/python3/import_dat/testfiles'
         fnameCCD = QtGui.QFileDialog.getOpenFileName(self,
                 'Open CCD File',
-                currentDir,
+                self.currentPath,
                 'Data Files (*.dat)')[0]
         self.CCDimg = li.UKSoftImg(fnameCCD)
-        self.setNormState(True)
-        self.getLEEMImg()
+
 
     def getCCDMenu(self, menuAction):
         menuCCD = QtGui.QMenu()
