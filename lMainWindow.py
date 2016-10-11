@@ -17,6 +17,8 @@ class ldispMain(QtWidgets.QMainWindow):
         self.initUI(fname)
         # create instance of metadata to set the default keys
         self.metadata = lmdm.MetaData()
+        self.b_normCCD = False
+        self.CCDimg = None
 
     def initUI(self, fname):
 
@@ -64,6 +66,13 @@ class ldispMain(QtWidgets.QMainWindow):
         self.metaDataGroup.setLayout(self.metaDataBox)
 
     def createToolbar(self):
+        ## Setup toolbar
+        toolbar = self.addToolBar('Tools')
+        toolbar.setMovable(False)
+        toolbar.setFloatable(False)
+        toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+
+        # Add actions
         ## exit
         exitAction = QtGui.QAction(QtGui.QIcon.fromTheme('application-exit'), 
                                    'Exit', self)
@@ -90,15 +99,23 @@ class ldispMain(QtWidgets.QMainWindow):
         spacer = QtWidgets.QWidget()
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, 
                              QtGui.QSizePolicy.Expanding)
-        ## Setup Toolbar
-        toolbar = self.addToolBar('Tools')
-        toolbar.setMovable(False)
-        toolbar.setFloatable(False)
-        toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+
+        ## Add actions to toolbar
         toolbar.addAction(openAction)
         toolbar.addAction(exitAction)
         toolbar.addAction(preImAction)
         toolbar.addAction(nextImAction)
+        ## substract CCD ##
+        # TODO Toggle button to norm CCD if file is set
+        normAction = QtGui.QAction(QtGui.QIcon.fromTheme('contrast'),
+                'Subtract CCD', self)
+        normAction.setCheckable(True)
+        toolbar.addAction(normAction)
+        self.getCCDMenu(normAction)
+        self.normButton = toolbar.widgetForAction(normAction)
+        self.normButton.setPopupMode(QtGui.QToolButton.DelayedPopup)
+        normAction.triggered.connect(self.normCCD)
+        ##
         toolbar.addWidget(spacer)
         toolbar.addAction(configAction)
 
@@ -123,8 +140,8 @@ class ldispMain(QtWidgets.QMainWindow):
         self.fmodel.setRootPath(path)
         # Filter out all files without extension .dat
         self.fmodel.setFilter(QtCore.QDir.Filter(
-            QtCore.QDir.Dirs | QtCore.QDir.Files |
-            QtCore.QDir.AllDirs | QtCore.QDir.NoDotAndDotDot))
+                QtCore.QDir.Dirs | QtCore.QDir.Files |
+                QtCore.QDir.AllDirs | QtCore.QDir.NoDotAndDotDot))
         nameFilter = ['*.dat']
         self.fmodel.setNameFilters(nameFilter)
         self.fmodel.setNameFilterDisables(False)
@@ -154,24 +171,81 @@ class ldispMain(QtWidgets.QMainWindow):
             self.metadata.setCurrentKeys(newKeys)
         # Load new data model if one is set after the keys were changed
         if self.metaDataListView.model() is not None:
-            self.metaDataListView.setModel(lmdm.lMetaDataModel(self.metadata.getDispedData(),
-                                                               self.metaDataListView))
+            self.metaDataListView.setModel(
+                    lmdm.lMetaDataModel(
+                            self.metadata.getDispedData(),
+                            self.metaDataListView))
  
     def disp_lfile(self, *args, **karwgs):
         """Displays LEEM images in pyqtgraph widget"""
+        ## TODO Cleanup. Function cluttered with CCD subtraction an file handling
         if args:
             fname = args[0]
         else:
             fname = self.lTreeView.get_fname()
         leem_img = li.UKSoftImg(fname)
+        if self.b_normCCD is True:
+            try:
+                leem_img.normalizeOnCCD(self.CCDimg)
+            except li.DimensionError:
+                msgbx = QtGui.QMessageBox()
+                msgbx.setText('Dimensions of image and CCD image do not match.')
+                msgbx.setIcon(QtGui.QMessageBox.Warning)
+                msgbx.exec_()
+                self.CCDimg = None
+                self.b_normCCD = False
+                self.normButton.setChecked(False)
         self.lImView.setImage(leem_img.data)
         self.metadata = lmdm.MetaData(leem_img.metadata)
         ## To avoid QTimer-Errors add parents (the views) to the models
         ## see http://stackoverflow.com/questions/30549477/
         ##         pyqt-qcombobox-with-qstringmodel-cause-
         ##         qobjectstarttimer-qtimer-can-only-be
-        self.metaDataListView.setModel(lmdm.lMetaDataModel(self.metadata.getDispedData(),
-                                                           self.metaDataListView))
+        self.metaDataListView.setModel(
+                lmdm.lMetaDataModel(
+                        self.metadata.getDispedData(),
+                        self.metaDataListView))
+
+    def toggleNormState(self):
+        if self.b_normCCD is False:
+            self.b_normCCD = True
+        elif self.b_normCCD is True:
+            self.b_normCCD = False
+        self.normButton.setChecked(self.b_normCCD)
+
+    def setNormState(self, state):
+        self.b_normCCD = state
+        self.normButton.setChecked(state)
+        try:
+            self.disp_lfile()
+        except TypeError:
+            pass
+
+    def normCCD(self):
+        if self.b_normCCD is False and self.CCDimg == None:
+            self.loadCCD()
+        self.toggleNormState()
+        try:
+            self.disp_lfile()
+        except TypeError:
+            pass
+
+    def loadCCD(self):
+        # TODO replace currentDir by cw-parameter
+        currentDir = '/home/adsche/python3/import_dat/testfiles'
+        fnameCCD = QtGui.QFileDialog.getOpenFileName(self,
+                'Open CCD File',
+                currentDir,
+                'Data Files (*.dat)')[0]
+        self.CCDimg = li.UKSoftImg(fnameCCD)
+        self.setNormState(True)
+
+    def getCCDMenu(self, menuAction):
+        menuCCD = QtGui.QMenu()
+        menuAction.setMenu(menuCCD)
+        getCCD = menuCCD.addAction('Open CCD image')
+        getCCD.setIcon(QtGui.QIcon.fromTheme('folder-pictures-symbolic'))
+        getCCD.triggered.connect(self.loadCCD)
 
     def setIconTheme(self):
         de = os.environ.get('DESKTOP_SESSION').lower()
