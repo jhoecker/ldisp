@@ -11,7 +11,8 @@ import lFileTreeView as lftv
 import lconfig
  
 class ldispMain(QtWidgets.QMainWindow):
-
+    """ldisp Main Window"""
+    leemImgChanged = QtCore.pyqtSignal()
     def __init__(self, fname):
         super(ldispMain, self).__init__()
         self.initUI(fname)
@@ -19,6 +20,9 @@ class ldispMain(QtWidgets.QMainWindow):
         self.metadata = lmdm.MetaData()
         self.b_normCCD = False
         self.CCDimg = None
+        self.leemImg = None
+
+        self.leemImgChanged.connect(self.disp_lfile)
 
     def initUI(self, fname):
 
@@ -106,7 +110,6 @@ class ldispMain(QtWidgets.QMainWindow):
         toolbar.addAction(preImAction)
         toolbar.addAction(nextImAction)
         ## substract CCD ##
-        # TODO Toggle button to norm CCD if file is set
         normAction = QtGui.QAction(QtGui.QIcon.fromTheme('contrast'),
                 'Subtract CCD', self)
         normAction.setCheckable(True)
@@ -115,7 +118,7 @@ class ldispMain(QtWidgets.QMainWindow):
         self.normButton = toolbar.widgetForAction(normAction)
         self.normButton.setPopupMode(QtGui.QToolButton.DelayedPopup)
         normAction.triggered.connect(self.normCCD)
-        ##
+        ## align config dialog on right hand side
         toolbar.addWidget(spacer)
         toolbar.addAction(configAction)
 
@@ -128,7 +131,7 @@ class ldispMain(QtWidgets.QMainWindow):
         elif os.path.isfile(fname):
             fname = os.path.abspath(fname)
             path = os.path.dirname(fname)
-            self.disp_lfile(fname)
+            self.leemImg = self.getLEEMImg(fname)
         elif os.path.isdir(fname):
             path = os.path.abspath(fname)
         else:
@@ -151,7 +154,7 @@ class ldispMain(QtWidgets.QMainWindow):
         self.lTreeView.setModel(self.fmodel)
         self.lTreeView.setRootIndex(self.fmodel.index(path))
         self.lTreeView.setupView()
-        self.lTreeView.newItemSelected.connect(self.disp_lfile)
+        self.lTreeView.newItemSelected.connect(self.getLEEMImg)
 
     def createImView(self):
         self.lImView = pg.ImageView()
@@ -175,28 +178,31 @@ class ldispMain(QtWidgets.QMainWindow):
                     lmdm.lMetaDataModel(
                             self.metadata.getDispedData(),
                             self.metaDataListView))
- 
-    def disp_lfile(self, *args, **karwgs):
-        """Displays LEEM images in pyqtgraph widget"""
-        ## TODO Cleanup. Function cluttered with CCD subtraction an file handling
+
+    def getLEEMImg(self, *args, **karwgs):
+        """Import LEEM image from path given by parameter or from tree view"""
         if args:
             fname = args[0]
         else:
             fname = self.lTreeView.get_fname()
-        leem_img = li.UKSoftImg(fname)
+        self.leemImg = li.UKSoftImg(fname)
         if self.b_normCCD is True:
+            logging.debug('getLEEMImg: b_normCCD is {}'.format(self.b_normCCD))
             try:
-                leem_img.normalizeOnCCD(self.CCDimg)
+                self.leemImg.normalizeOnCCD(self.CCDimg)
             except li.DimensionError:
                 msgbx = QtGui.QMessageBox()
                 msgbx.setText('Dimensions of image and CCD image do not match.')
                 msgbx.setIcon(QtGui.QMessageBox.Warning)
                 msgbx.exec_()
                 self.CCDimg = None
-                self.b_normCCD = False
-                self.normButton.setChecked(False)
-        self.lImView.setImage(leem_img.data)
-        self.metadata = lmdm.MetaData(leem_img.metadata)
+                self.toggleNormState()
+        self.leemImgChanged.emit()
+
+    def disp_lfile(self):
+        """Displays LEEM images in pyqtgraph widget"""
+        self.lImView.setImage(self.leemImg.data)
+        self.metadata = lmdm.MetaData(self.leemImg.metadata)
         ## To avoid QTimer-Errors add parents (the views) to the models
         ## see http://stackoverflow.com/questions/30549477/
         ##         pyqt-qcombobox-with-qstringmodel-cause-
@@ -212,23 +218,20 @@ class ldispMain(QtWidgets.QMainWindow):
         elif self.b_normCCD is True:
             self.b_normCCD = False
         self.normButton.setChecked(self.b_normCCD)
+        try:
+            self.getLEEMImg()
+        except TypeError:
+            pass
 
     def setNormState(self, state):
         self.b_normCCD = state
         self.normButton.setChecked(state)
-        try:
-            self.disp_lfile()
-        except TypeError:
-            pass
 
     def normCCD(self):
         if self.b_normCCD is False and self.CCDimg == None:
             self.loadCCD()
+            return
         self.toggleNormState()
-        try:
-            self.disp_lfile()
-        except TypeError:
-            pass
 
     def loadCCD(self):
         # TODO replace currentDir by cw-parameter
@@ -239,6 +242,7 @@ class ldispMain(QtWidgets.QMainWindow):
                 'Data Files (*.dat)')[0]
         self.CCDimg = li.UKSoftImg(fnameCCD)
         self.setNormState(True)
+        self.getLEEMImg()
 
     def getCCDMenu(self, menuAction):
         menuCCD = QtGui.QMenu()
