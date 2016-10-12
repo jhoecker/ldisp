@@ -63,3 +63,9 @@ class lTreeView(QtWidgets.QTreeView):
                                      QtCore.QItemSelectionModel.Select)
         if not self.model().isDir(newIndex):
             self.newItemSelected.emit()
+
+    def selectByFileName(self, fname):
+        selectedIndex = self.model().index(fname)
+        self.selectionModel().select(selectedIndex,
+                                     QtCore.QItemSelectionModel.Select)
+        self.newItemSelected.emit()

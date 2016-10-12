@@ -27,10 +27,8 @@ class ldispMain(QtWidgets.QMainWindow):
 
         self.initUI()
 
-        # image file if given from cmd
-        ## FIXME CCD subtraction is not working on images loaded from cmd
-        # will be fixed if item is selected (see TODO in createFolderView)
-        if filename: self.getLEEMImg(filename)
+        #image file if given from cmd
+        if filename: self.lTreeView.selectByFileName(fname)
 
     def initUI(self):
 
@@ -132,7 +130,6 @@ class ldispMain(QtWidgets.QMainWindow):
 
     def createFolderView(self):
         """Sets up the folder view and the corresponding filesystem model"""
-        ## TODO Pass filename if set to view and select
         self.lTreeView = lftv.lTreeView()
 
         # Set Model
@@ -224,7 +221,6 @@ class ldispMain(QtWidgets.QMainWindow):
             self.currentPath = os.path.curdir
         return fname
 
-
     def toggleNormState(self):
         if self.b_normCCD is False:
             self.b_normCCD = True
@@ -251,7 +247,6 @@ class ldispMain(QtWidgets.QMainWindow):
                 self.currentPath,
                 'Data Files (*.dat)')[0]
         self.CCDimg = li.UKSoftImg(fnameCCD)
-
 
     def getCCDMenu(self, menuAction):
         menuCCD = QtGui.QMenu()
