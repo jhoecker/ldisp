@@ -28,7 +28,8 @@ class ldispMain(QtWidgets.QMainWindow):
         self.initUI()
 
         #image file if given from cmd
-        if filename: self.lTreeView.selectByFileName(fname)
+        if (filename is not None and os.path.isfile(filename) is True):
+            self.lTreeView.selectByFileName(fname)
 
     def initUI(self):
 
@@ -116,7 +117,7 @@ class ldispMain(QtWidgets.QMainWindow):
         toolbar.addAction(preImAction)
         toolbar.addAction(nextImAction)
         ## substract CCD ##
-        normAction = QtGui.QAction(QtGui.QIcon.fromTheme('contrast'),
+        normAction = QtGui.QAction(QtGui.QIcon.fromTheme('draw-circle'),
                 'Subtract CCD', self)
         normAction.setCheckable(True)
         toolbar.addAction(normAction)
@@ -124,6 +125,14 @@ class ldispMain(QtWidgets.QMainWindow):
         self.normButton = toolbar.widgetForAction(normAction)
         self.normButton.setPopupMode(QtGui.QToolButton.DelayedPopup)
         normAction.triggered.connect(self.toggleCCDButton)
+        ## filter inelastics
+        filterInelastics = QtGui.QAction(QtGui.QIcon.fromTheme('antivignetting'),
+                                         'Filter LEED', self)
+        filterInelastics.setCheckable(True)
+        toolbar.addAction(filterInelastics)
+        self.filterLEEDButton = toolbar.widgetForAction(filterInelastics)
+        filterInelastics.triggered.connect(self.toggle_filter_LEED)
+        print('Filter state: {}'.format(filterInelastics.isChecked()))
         ## align config dialog on right hand side
         toolbar.addWidget(spacer)
         toolbar.addAction(configAction)
@@ -156,7 +165,8 @@ class ldispMain(QtWidgets.QMainWindow):
     def open_folder(self):
         dname = QtGui.QFileDialog.getExistingDirectory(self,
                 'Select Directory',
-                self.currentPath)
+                self.currentPath,
+                QtGui.QFileDialog.ShowDirsOnly)
         self.fmodel.setRootPath(dname)
         self.lTreeView.setRootIndex(self.fmodel.index(dname))
         self.lTreeView.sortByColumn(0,0)
@@ -185,7 +195,7 @@ class ldispMain(QtWidgets.QMainWindow):
         logging.debug('getLEEMImg: b_normCCD is {}'.format(self.b_normCCD))
         if self.b_normCCD is True:
             try:
-                self.leemImg.normalizeOnCCD(self.CCDimg)
+                self.leemImg.data = self.leemImg.normalizeOnCCD(self.CCDimg)
             except li.DimensionError:
                 msgbx = QtGui.QMessageBox()
                 msgbx.setText('Dimensions of image and CCD image do not match.')
@@ -254,6 +264,16 @@ class ldispMain(QtWidgets.QMainWindow):
         getCCD = menuCCD.addAction('Open CCD image')
         getCCD.setIcon(QtGui.QIcon.fromTheme('folder-pictures-symbolic'))
         getCCD.triggered.connect(self.loadCCD)
+
+    def toggle_filter_LEED(self):
+        filterState = self.filterLEEDButton.isChecked()
+        logging.debug('lMainWindow toggle_filter_LEED: filterState = {}'
+                .format(filterState))
+        if filterState is True:
+            self.leemImg.data = self.leemImg.filterInelasticBkg(15)
+            self.disp_lfile()
+        else:
+            self.getLEEMImg()
 
     def setIconTheme(self):
         de = os.environ.get('DESKTOP_SESSION').lower()
