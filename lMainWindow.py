@@ -159,14 +159,17 @@ class ldispMain(QtWidgets.QMainWindow):
         self.lImView = pg.ImageView()
 
     def open_folder(self):
+        # FIXME QFileDialog widget seems not to expand the folders in Qt5
         dname = QtWidgets.QFileDialog.getExistingDirectory(self,
                 'Select Directory',
                 self.currentPath,
                 QtWidgets.QFileDialog.ShowDirsOnly)
         if not dname:
             return
-        self.fmodel.setRootPath(dname)
-        self.lTreeView.setRootIndex(self.fmodel.index(dname))
+        else:
+            self.currentPath = dname
+        self.fmodel.setRootPath(self.currentPath)
+        self.lTreeView.setRootIndex(self.fmodel.index(self.currentPath))
         self.lTreeView.sortByColumn(0,0)
         
     def configure_View(self):
