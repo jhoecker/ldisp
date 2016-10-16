@@ -117,22 +117,18 @@ class ldispMain(QtWidgets.QMainWindow):
         toolbar.addAction(preImAction)
         toolbar.addAction(nextImAction)
         ## substract CCD ##
-        normAction = QtGui.QAction(QtGui.QIcon.fromTheme('draw-circle'),
+        self.normAction = QtGui.QAction(QtGui.QIcon.fromTheme('draw-circle'),
                 'Subtract CCD', self)
-        normAction.setCheckable(True)
-        toolbar.addAction(normAction)
-        self.getCCDMenu(normAction)
-        self.normButton = toolbar.widgetForAction(normAction)
-        self.normButton.setPopupMode(QtGui.QToolButton.DelayedPopup)
-        normAction.triggered.connect(self.toggleCCDButton)
+        self.normAction.setCheckable(True)
+        toolbar.addAction(self.normAction)
+        self.getCCDMenu(self.normAction)
+        self.normAction.triggered.connect(self.toggleCCD)
         ## filter inelastics
-        filterInelastics = QtGui.QAction(QtGui.QIcon.fromTheme('antivignetting'),
-                                         'Filter LEED', self)
-        filterInelastics.setCheckable(True)
-        toolbar.addAction(filterInelastics)
-        self.filterLEEDButton = toolbar.widgetForAction(filterInelastics)
-        filterInelastics.triggered.connect(self.toggle_filter_LEED)
-        print('Filter state: {}'.format(filterInelastics.isChecked()))
+        self.filterInelastics = QtGui.QAction(QtGui.QIcon.fromTheme('antivignetting'),
+                                              'Filter LEED', self)
+        self.filterInelastics.setCheckable(True)
+        toolbar.addAction(self.filterInelastics)
+        self.filterInelastics.triggered.connect(self.toggle_filter_LEED)
         ## align config dialog on right hand side
         toolbar.addWidget(spacer)
         toolbar.addAction(configAction)
@@ -163,10 +159,12 @@ class ldispMain(QtWidgets.QMainWindow):
         self.lImView = pg.ImageView()
 
     def open_folder(self):
-        dname = QtGui.QFileDialog.getExistingDirectory(self,
+        dname = QtWidgets.QFileDialog.getExistingDirectory(self,
                 'Select Directory',
                 self.currentPath,
-                QtGui.QFileDialog.ShowDirsOnly)
+                QtWidgets.QFileDialog.ShowDirsOnly)
+        if not dname:
+            return
         self.fmodel.setRootPath(dname)
         self.lTreeView.setRootIndex(self.fmodel.index(dname))
         self.lTreeView.sortByColumn(0,0)
@@ -202,7 +200,7 @@ class ldispMain(QtWidgets.QMainWindow):
                 msgbx.setIcon(QtGui.QMessageBox.Warning)
                 msgbx.exec_()
                 self.CCDimg = None
-                self.toggleNormState()
+                self.setNormState(False)
         self.leemImgChanged.emit()
 
     def disp_lfile(self):
@@ -231,32 +229,36 @@ class ldispMain(QtWidgets.QMainWindow):
             self.currentPath = os.path.curdir
         return fname
 
-    def toggleNormState(self):
-        if self.b_normCCD is False:
+    def setNormState(self, state):
+        self.b_normCCD = state
+        self.normAction.setChecked(state)
+
+    def toggleCCD(self):
+        logging.debug(('lMainWindow: toggleCCD: normAction is {}, ' +
+                'b_normCCD is {}').format(self.normAction.isChecked(),
+                                         self.b_normCCD))
+        if self.normAction.isChecked():
             self.b_normCCD = True
-        elif self.b_normCCD is True:
+        else:
             self.b_normCCD = False
-        self.normButton.setChecked(self.b_normCCD)
+        if self.b_normCCD is True and self.CCDimg == None:
+            self.loadCCD()
         try:
             self.getLEEMImg()
         except TypeError:
+            logging.debug('toggleCCD: TypeError exception raised')
             pass
-
-    def setNormState(self, state):
-        self.b_normCCD = state
-        self.normButton.setChecked(state)
-
-    def toggleCCDButton(self):
-        if self.b_normCCD is False and self.CCDimg == None:
-            self.loadCCD()
-        self.toggleNormState()
 
     def loadCCD(self):
         fnameCCD = QtGui.QFileDialog.getOpenFileName(self,
                 'Open CCD File',
                 self.currentPath,
                 'Data Files (*.dat)')[0]
+        if not fnameCCD and self.CCDimg == None:
+            self.setNormState(False)
+            return
         self.CCDimg = li.UKSoftImg(fnameCCD)
+        logging.debug('lMainWindow: loadCCD: CCD loaded')
 
     def getCCDMenu(self, menuAction):
         menuCCD = QtGui.QMenu()
@@ -266,7 +268,7 @@ class ldispMain(QtWidgets.QMainWindow):
         getCCD.triggered.connect(self.loadCCD)
 
     def toggle_filter_LEED(self):
-        filterState = self.filterLEEDButton.isChecked()
+        filterState = self.filterInelastics.isChecked()
         logging.debug('lMainWindow toggle_filter_LEED: filterState = {}'
                 .format(filterState))
         if filterState is True:
