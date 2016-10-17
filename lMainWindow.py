@@ -253,7 +253,6 @@ class ldispMain(QtWidgets.QMainWindow):
             pass
 
     def loadCCD(self):
-        print(self.currentPath)
         fnameCCD = QtGui.QFileDialog.getOpenFileName(self,
                 'Open CCD File',
                 self.currentPath,
