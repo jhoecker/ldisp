@@ -47,6 +47,7 @@ class lTreeView(QtWidgets.QTreeView):
         self.clearSelection()
         self.selectionModel().select(newIndex, 
                                      QtCore.QItemSelectionModel.Select)
+        self.scrollTo(newIndex, QtGui.QAbstractItemView.PositionAtTop)
         if not self.model().isDir(newIndex):
             self.newItemSelected.emit() 
         
@@ -61,6 +62,7 @@ class lTreeView(QtWidgets.QTreeView):
         self.clearSelection()
         self.selectionModel().select(newIndex, 
                                      QtCore.QItemSelectionModel.Select)
+        self.scrollTo(newIndex, QtGui.QAbstractItemView.PositionAtBottom)
         if not self.model().isDir(newIndex):
             self.newItemSelected.emit()
 
