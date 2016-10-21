@@ -192,7 +192,7 @@ class ldispMain(QtWidgets.QMainWindow):
             fname = args[0]
         else:
             fname = self.lTreeView.get_fname()
-        self.leemImg = li.UKSoftImg(fname)
+        self.leemImg = li.LEEMImage(fname)
         logging.debug('getLEEMImg: b_normCCD is {}'.format(self.b_normCCD))
         if self.b_normCCD is True:
             try:
@@ -260,7 +260,7 @@ class ldispMain(QtWidgets.QMainWindow):
         if not fnameCCD and self.CCDimg == None:
             self.setNormState(False)
             return
-        self.CCDimg = li.UKSoftImg(fnameCCD)
+        self.CCDimg = li.LEEMImage(fnameCCD)
         logging.debug('lMainWindow: loadCCD: CCD loaded')
 
     def getCCDMenu(self, menuAction):

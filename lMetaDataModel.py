@@ -8,7 +8,7 @@ class lMetaDataModel(QtCore.QAbstractListModel):
         self._metadata = dispedData
 
     def rowCount(self, parent):
-        return len(self._metadata)+1
+        return len(self._metadata)
 
     def data(self, index, role):
         data_keys = list(self._metadata.keys())
