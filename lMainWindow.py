@@ -63,7 +63,7 @@ class ldispMain(QtWidgets.QMainWindow):
 
         QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
 
-        self.setGeometry(0, 0, 900, 500)
+        self.setGeometry(50, 50, 950, 550)
         self.setWindowTitle('ldisp - LEEM image viewer')
 
     def createMetaDataView(self):
