@@ -175,9 +175,7 @@ class ldispMain(QtWidgets.QMainWindow):
         
     def configure_View(self):
         self.configDialog = lconfig.ConfDialog(self.metadata.currentKeys)
-        # FIXME Use QDialog.Accept or something similar.
-        # Using .exec_ == 1024 is just a workaround
-        if self.configDialog.exec_() == 1024:
+        if self.configDialog.exec_() == QtGui.QDialog.Accepted:
             newKeys = self.configDialog.getMetaDataKeys()
             self.filterLEED_sigma = self.configDialog.getSigma()
             self.metadata.setCurrentKeys(newKeys)
