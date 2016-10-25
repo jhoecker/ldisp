@@ -22,6 +22,7 @@ class ldispMain(QtWidgets.QMainWindow):
         self.b_normCCD = False
         self.CCDimg = None
         self.leemImg = None
+        self.filterLEED_sigma = 15
         filename = self.getPath(fname)
         self.leemImgChanged.connect(self.disp_lfile)
 
@@ -178,6 +179,7 @@ class ldispMain(QtWidgets.QMainWindow):
         # Using .exec_ == 1024 is just a workaround
         if self.configDialog.exec_() == 1024:
             newKeys = self.configDialog.getMetaDataKeys()
+            self.filterLEED_sigma = self.configDialog.getSigma()
             self.metadata.setCurrentKeys(newKeys)
         # Load new data model if one is set after the keys were changed
         if self.metaDataListView.model() is not None:

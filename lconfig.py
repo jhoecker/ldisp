@@ -11,8 +11,8 @@ class ConfDialog(QtGui.QMessageBox):
         self._metaDataBoxes = dict()
 
         # Instantiate UI elements
-        self.boxGroup = QtGui.QGroupBox('Display meta data')
-        self.boxGroup.setAlignment(QtCore.Qt.AlignLeft)
+        boxGroup = QtGui.QGroupBox('Display meta data')
+        boxGroup.setAlignment(QtCore.Qt.AlignLeft)
         layoutCheckboxes = QtGui.QGridLayout()
         ii = 0
         for item in _availMetaDataKeys:
@@ -20,8 +20,22 @@ class ConfDialog(QtGui.QMessageBox):
             self._metaDataBoxes[item] = QtWidgets.QCheckBox(item)
             layoutCheckboxes.addWidget(self._metaDataBoxes[item], ii-ii%3,ii%3)
             ii += 1
-        self.boxGroup.setLayout(layoutCheckboxes)
-        self.layout().addWidget(self.boxGroup, 0, 0)
+        boxGroup.setLayout(layoutCheckboxes)
+
+        ## Set filter sigma for LEED image filter
+        filterLEEDGroup = QtGui.QGroupBox('LEED filter option')
+        filterLEEDBox = QtGui.QHBoxLayout()
+        filterLEEDLabel = QtGui.QLabel('Set sigma of gaussian filter:')
+        self.filterLEEDSpinBox = QtGui.QSpinBox()
+        self.filterLEEDSpinBox.setValue(15)
+        self.filterLEEDSpinBox.setRange(0, 30)
+        self.filterLEEDSpinBox.setSingleStep(1)
+        filterLEEDBox.addWidget(filterLEEDLabel)
+        filterLEEDBox.addWidget(self.filterLEEDSpinBox)
+        filterLEEDGroup.setLayout(filterLEEDBox)
+
+        self.layout().addWidget(boxGroup, 0, 0)
+        self.layout().addWidget(filterLEEDGroup, 1, 0)
 
         self.setStandardButtons(self.Ok | self.Cancel)
         self.setWindowTitle('Configuration')
@@ -37,3 +51,6 @@ class ConfDialog(QtGui.QMessageBox):
     def setMetaDataKeys(self, dispedKeys):
         for key in dispedKeys:
             self._metaDataBoxes[key].setChecked(True)
+
+    def getSigma(self):
+        return self.filterLEEDSpinBox.value()
