@@ -105,8 +105,8 @@ class ldispMain(QtWidgets.QMainWindow):
         preImAction.triggered.connect(self.lTreeView.selectPrevious)
         ## configuration dialog
         configAction = QtGui.QAction(QtGui.QIcon.fromTheme('configure'),
-                                    'Configure View', self)
-        configAction.triggered.connect(self.configure_View)
+                                    'Configure', self)
+        configAction.triggered.connect(self.configure_dialog)
         ## shift config dialog to the right
         spacer = QtWidgets.QWidget()
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, 
@@ -173,7 +173,7 @@ class ldispMain(QtWidgets.QMainWindow):
         self.lTreeView.setRootIndex(self.fmodel.index(self.currentPath))
         self.lTreeView.sortByColumn(0,0)
         
-    def configure_View(self):
+    def configure_dialog(self):
         self.configDialog = lconfig.ConfDialog(self.metadata.currentKeys)
         if self.configDialog.exec_() == QtGui.QDialog.Accepted:
             newKeys = self.configDialog.getMetaDataKeys()
