@@ -18,11 +18,13 @@ class ldispMain(QtWidgets.QMainWindow):
         super(ldispMain, self).__init__()
         # create instance of metadata to set the default keys
         self.metadata = lmdm.MetaData()
-        # variables
+
+        # global variables
         self.b_normCCD = False
         self.CCDimg = None
         self.leemImg = None
         self.filterLEED_sigma = 15
+
         filename = self.getPath(fname)
         self.leemImgChanged.connect(self.disp_lfile)
 

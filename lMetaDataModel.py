@@ -28,7 +28,10 @@ class lMetaDataModel(QtCore.QAbstractListModel):
         if key == 'Main' or key == 'Column':
             value = '{0:.1e} {1}'.format(value[0], value[1])
         elif type(value) is list:
-            value = '{0:.1f} {1}'.format(value[0], value[1])
+            try:
+                value = '{0:.1f} {1}'.format(value[0], value[1])
+            except ValueError:
+                value = '{0} {1}'.format(value[0], value[1])
         return key, value
     
 
