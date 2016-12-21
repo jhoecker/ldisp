@@ -1,0 +1,9 @@
+## BUGS
+
+## Features
+- Allow scrolling by arrow keys
+- Checkbox to save intensity values when scrolling to next image
+- Better guess for good contrast
+(!) Set export to native file size
+- New widget for metadata display
+
