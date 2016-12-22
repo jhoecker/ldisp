@@ -21,13 +21,13 @@ setup(
     long_description=long_description,
     #url=TODO,
     author='Jan Höcker',
-    #license=TODO: Check Qt license,
+    license='GPLv3',
     packages=['ldisp'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science',
-        'Topics :: Science :: Microscopy Image Viewer',
-        #TODO 'License :: OSI Approved :: GPLv3',
+        'Topic :: Scientific/Engineering :: Visualization',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python :: 3'
         ],
     keywords='LEEM Science Image Viewer',
