@@ -6,9 +6,9 @@ import logging
 import os
 import signal
 import sys
-import lMainWindow
 
-from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+from ldisp import lMainWindow
 
 ## version flag (python 2 or 3)
 py_version = sys.version_info[0]          
@@ -43,7 +43,7 @@ def showMainWindow(fname, foreground=False):
             return
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     
     window = lMainWindow.ldispMain(fname)
     

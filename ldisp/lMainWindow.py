@@ -6,9 +6,10 @@ import logging
 import os
 import pyqtgraph as pg
 import LEEMImage as li
-import lMetaDataModel as lmdm
-import lFileTreeView as lftv
-import lconfig
+
+from . import lMetaDataModel as lmdm
+from . import lFileTreeView as lftv
+from . import lconfig
  
 class ldispMain(QtWidgets.QMainWindow):
     """ldisp Main Window"""
