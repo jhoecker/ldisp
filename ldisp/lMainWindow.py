@@ -211,7 +211,7 @@ class ldispMain(QtWidgets.QMainWindow):
 
     def disp_lfile(self):
         """Displays LEEM images in pyqtgraph widget"""
-        self.lImView.setImage(self.leemImg.data)
+        self.lImView.setImage(self.leemImg.data.T)
         self.metadata = lmdm.MetaData(self.leemImg.metadata)
         ## To avoid QTimer-Errors add parents (the views) to the models
         ## see http://stackoverflow.com/questions/30549477/
