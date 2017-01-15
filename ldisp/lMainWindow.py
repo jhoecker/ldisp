@@ -211,7 +211,8 @@ class ldispMain(QtWidgets.QMainWindow):
 
     def disp_lfile(self):
         """Displays LEEM images in pyqtgraph widget"""
-        self.lImView.setImage(self.leemImg.data.T)
+        img_levels = (self.leemImg.get_levels())
+        self.lImView.setImage(self.leemImg.data.T, levels=img_levels)
         self.metadata = lmdm.MetaData(self.leemImg.metadata)
         ## To avoid QTimer-Errors add parents (the views) to the models
         ## see http://stackoverflow.com/questions/30549477/
@@ -278,7 +279,7 @@ class ldispMain(QtWidgets.QMainWindow):
         logging.debug('lMainWindow toggle_filter_LEED: filterState = {}'
                 .format(filterState))
         if filterState is True:
-            self.leemImg.data = self.leemImg.filterInelasticBkg(15)
+            self.leemImg.data = self.leemImg.filterInelasticBkg(self.filterLEED_sigma)
             self.disp_lfile()
         else:
             self.getLEEMImg()
